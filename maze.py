@@ -1,8 +1,8 @@
 from pygame import *
 
 class GameSprite():
-    def __init__(self, img, speed, x, y):
-        self.img = transform.scale(image.load(img), (50,50))
+    def __init__(self, img, speed, x, y, sizes=(30,30)):
+        self.img = transform.scale(image.load(img), sizes)
         self.rect = self.img.get_rect()
         self.speed = speed
         self.rect.x = x
@@ -18,7 +18,7 @@ class Hero(GameSprite):
         keys = key.get_pressed()
        
         if keys[K_d]:
-            if self.rect.x < 640:
+            if self.rect.x < 1000:
 
                 self.rect.x += self.speed 
         if keys[K_a]:
@@ -28,7 +28,7 @@ class Hero(GameSprite):
             if self.rect.y > 5:
                 self.rect.y -= self.speed
         if keys[K_s]:
-            if self.rect.y < 440:
+            if self.rect.y < 700:
 
                 self.rect.y += self.speed
 
@@ -37,8 +37,10 @@ class Enemy(GameSprite):
     def move(self, start, end):
         if self.direction == "right":
             self.rect.x += 5
+            self.rect.y += 5
         if self.direction == "left":
             self.rect.x -= 5
+            self.rect.y -= 5
         if self.rect.x >= end:
             self.direction = "left"
         if self.rect.x <= start:
@@ -63,7 +65,7 @@ window = display.set_mode((1000, 700))
 
 mixer.init()
 mixer.music.load('jungles.ogg')
-# mixer.music.play()
+mixer.music.play()
 
 kick = mixer.Sound('kick.ogg')
 
@@ -75,6 +77,7 @@ clock = time.Clock()
 hero = Hero("hero.png", 5, 25, 25)
 enemy = Enemy("cyborg.png", 10, 50, 50)
 
+golde = GameSprite("treasure.png", 10, 900, 600, (50, 50))
 
 
 walls = [ 
@@ -114,20 +117,23 @@ map  = '''
 11111111111111111111111111111111111111113
 
 '''
-
-
+font.init()
+font1 = font.Font(None, 50)
 while game:
-
+    
     window.blit(background, (0,0))
     hero.reset()
     hero.move()
     enemy.reset()
-    enemy.move(0, 700)
-
+    enemy.move(75, 650)
+    golde.reset()
     # for wall in walls:
     #     wall.draw()
     wall_x = -25
     wall_y = 0
+
+   
+
 
     for i in map:
 
@@ -145,6 +151,14 @@ while game:
             wall_y += 25
             wall_x = -25
         
+    if hero.rect.colliderect(golde.rect):
+        window.blit(font1.render(f"Перемога", True, (255,255,255), (0,0,0)), (450, 350))
+
+    if hero.rect.colliderect(enemy.rect):
+        hero.rect.x = 25
+        hero.rect.y = 25
+
+    
 
 
     for e in event.get():
